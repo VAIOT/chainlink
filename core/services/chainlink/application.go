@@ -416,6 +416,7 @@ func NewApplication(opts ApplicationOpts) (Application, error) {
 			bridgeORM,
 			mercuryORM,
 			pipelineRunner,
+			streamRegistry,
 			peerWrapper,
 			telemetryManager,
 			legacyEVMChains,
