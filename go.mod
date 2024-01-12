@@ -2,6 +2,12 @@ module github.com/smartcontractkit/chainlink/v2
 
 go 1.21.3
 
+replace github.com/smartcontractkit/libocr => github.com/jmank88/libocr v0.0.0-20240210134315-ddb9972560af
+
+replace github.com/smartcontractkit/tdh2/go/ocr2/decryptionplugin => github.com/jmank88/tdh2/go/ocr2/decryptionplugin v0.0.0-20240112231155-782e854d3ca2
+
+replace github.com/smartcontractkit/tdh2/go/tdh2 => github.com/jmank88/tdh2/go/tdh2 v0.0.0-20240112231155-782e854d3ca2
+
 require (
 	github.com/Depado/ginprom v1.8.0
 	github.com/Masterminds/semver/v3 v3.2.1
@@ -65,14 +71,14 @@ require (
 	github.com/shirou/gopsutil/v3 v3.23.11
 	github.com/shopspring/decimal v1.3.1
 	github.com/smartcontractkit/caigo v0.0.0-20230621050857-b29a4ca8c704
-	github.com/smartcontractkit/chainlink-automation v1.0.2-0.20240118014648-1ab6a88c9429
-	github.com/smartcontractkit/chainlink-common v0.1.7-0.20240209032254-f9b58810d8ca
-	github.com/smartcontractkit/chainlink-cosmos v0.4.1-0.20240206150430-fbccaa95af62
+	github.com/smartcontractkit/chainlink-automation v1.0.2-0.20240211010412-88ec42ae1b28
+	github.com/smartcontractkit/chainlink-common v0.1.7-0.20240210134843-10f448bea84e
+	github.com/smartcontractkit/chainlink-cosmos v0.4.1-0.20240211011130-6d68219f45ea
 	github.com/smartcontractkit/chainlink-data-streams v0.0.0-20231204152908-a6e3fe8ff2a1
-	github.com/smartcontractkit/chainlink-feeds v0.0.0-20240119021347-3c541a78cdb8
-	github.com/smartcontractkit/chainlink-solana v1.0.3-0.20240207182351-414a66663857
-	github.com/smartcontractkit/chainlink-starknet/relayer v0.0.1-beta-test.0.20240206145519-35a4346b5944
-	github.com/smartcontractkit/chainlink-vrf v0.0.0-20231120191722-fef03814f868
+	github.com/smartcontractkit/chainlink-feeds v0.0.0-20231127231053-2232d3a6766d
+	github.com/smartcontractkit/chainlink-solana v1.0.3-0.20240211005950-b281a168827f
+	github.com/smartcontractkit/chainlink-starknet/relayer v0.0.1-beta-test.0.20240211011754-b70d5a45c6be
+	github.com/smartcontractkit/chainlink-vrf v0.0.0-20240112231546-45f885b4077e
 	github.com/smartcontractkit/libocr v0.0.0-20240112202000-6359502d2ff1
 	github.com/smartcontractkit/tdh2/go/ocr2/decryptionplugin v0.0.0-20230906073235-9e478e5e19f1
 	github.com/smartcontractkit/tdh2/go/tdh2 v0.0.0-20230906073235-9e478e5e19f1
