@@ -39,6 +39,8 @@ contract TermsOfServiceAllowList is ITermsOfServiceAllowList, IAccessController,
   // |                       Initialization                         |
   // ================================================================
 
+  /// @dev Initial allowed senders & blocked senders have a combined limit of around 500k addresses
+  /// Beyond that, migrations will need to handled in batches
   constructor(
     TermsOfServiceAllowListConfig memory config,
     address[] memory initialAllowedSenders,

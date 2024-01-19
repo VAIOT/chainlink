@@ -10,9 +10,32 @@ import "forge-std/Vm.sol";
 
 /// @notice #constructor
 contract FunctionsTermsOfServiceAllowList_Constructor is FunctionsRoutesSetup {
+  uint256 internal constant initalSendersEntries = 100000; // ~500k limit, keeping lower for test speed
+  address[] internal s_initialAllowedSenders;
+  address[] internal s_initialBlockedSenders;
+
+  function setUp() public virtual override {
+    FunctionsRoutesSetup.setUp();
+
+    for (uint256 i = 1; i <= initalSendersEntries; ++i) {
+      s_initialAllowedSenders.push(vm.addr(i));
+    }
+  }
+
   function test_Constructor_Success() public {
     assertEq(s_termsOfServiceAllowList.typeAndVersion(), "Functions Terms of Service Allow List v1.1.0");
     assertEq(s_termsOfServiceAllowList.owner(), OWNER_ADDRESS);
+  }
+
+  function test_Constructor_InitializationSuccess() public {
+
+    TermsOfServiceAllowList _termsOfServiceAllowList = new TermsOfServiceAllowList(
+      getTermsOfServiceConfig(),
+      s_initialAllowedSenders,
+      s_initialBlockedSenders
+    );
+
+    assertEq(_termsOfServiceAllowList.getAllowedSendersCount(), initalSendersEntries);
   }
 }
 
