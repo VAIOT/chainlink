@@ -73,7 +73,7 @@ const (
 type LogPollerTest interface {
 	LogPoller
 	PollAndSaveLogs(ctx context.Context, currentBlockNumber int64)
-	BackupPollAndSaveLogs(ctx context.Context, backupPollerBlockDelay int64)
+	BackupPollAndSaveLogs(ctx context.Context)
 	Filter(from, to *big.Int, bh *common.Hash) ethereum.FilterQuery
 	GetReplayFromBlock(ctx context.Context, requested int64) (int64, error)
 	PruneOldBlocks(ctx context.Context) error
@@ -105,7 +105,8 @@ type logPoller struct {
 	keepFinalizedBlocksDepth int64         // the number of blocks behind the last finalized block we keep in database
 	backfillBatchSize        int64         // batch size to use when backfilling finalized logs
 	rpcBatchSize             int64         // batch size to use for fallback RPC calls made in GetBlocks
-	backupPollerNextBlock    int64
+	backupPollerNextBlock    int64         // next block to be processed by Backup LogPoller
+	backupPollerBlockDelay   int64         // how far behind regular LogPoller should BackupLogPoller run. 0 = disabled
 
 	filterMu        sync.RWMutex
 	filters         map[string]Filter
@@ -120,6 +121,16 @@ type logPoller struct {
 	wg             sync.WaitGroup
 }
 
+type Opts struct {
+	PollPeriod               time.Duration
+	UseFinalityTag           bool
+	FinalityDepth            int64
+	BackfillBatchSize        int64
+	RpcBatchSize             int64
+	KeepFinalizedBlocksDepth int64
+	BackupPollerBlockDelay   int64
+}
+
 // NewLogPoller creates a log poller. Note there is an assumption
 // that blocks can be processed faster than they are produced for the given chain, or the poller will fall behind.
 // Block processing involves the following calls in steady state (without reorgs):
@@ -130,8 +141,7 @@ type logPoller struct {
 //
 // How fast that can be done depends largely on network speed and DB, but even for the fastest
 // support chain, polygon, which has 2s block times, we need RPCs roughly with <= 500ms latency
-func NewLogPoller(orm ORM, ec Client, lggr logger.Logger, pollPeriod time.Duration,
-	useFinalityTag bool, finalityDepth int64, backfillBatchSize int64, rpcBatchSize int64, keepFinalizedBlocksDepth int64) *logPoller {
+func NewLogPoller(orm ORM, ec Client, lggr logger.Logger, opts Opts) *logPoller {
 	ctx, cancel := context.WithCancel(context.Background())
 	return &logPoller{
 		ctx:                      ctx,
@@ -141,12 +151,13 @@ func NewLogPoller(orm ORM, ec Client, lggr logger.Logger, pollPeriod time.Durati
 		lggr:                     logger.Sugared(logger.Named(lggr, "LogPoller")),
 		replayStart:              make(chan int64),
 		replayComplete:           make(chan error),
-		pollPeriod:               pollPeriod,
-		finalityDepth:            finalityDepth,
-		useFinalityTag:           useFinalityTag,
-		backfillBatchSize:        backfillBatchSize,
-		rpcBatchSize:             rpcBatchSize,
-		keepFinalizedBlocksDepth: keepFinalizedBlocksDepth,
+		pollPeriod:               opts.PollPeriod,
+		backupPollerBlockDelay:   opts.BackupPollerBlockDelay,
+		finalityDepth:            opts.FinalityDepth,
+		useFinalityTag:           opts.UseFinalityTag,
+		backfillBatchSize:        opts.BackfillBatchSize,
+		rpcBatchSize:             opts.RpcBatchSize,
+		keepFinalizedBlocksDepth: opts.KeepFinalizedBlocksDepth,
 		filters:                  make(map[string]Filter),
 		filterDirty:              true, // Always build Filter on first call to cache an empty filter if nothing registered yet.
 	}
@@ -524,22 +535,23 @@ func (lp *logPoller) run() {
 			}
 			lp.PollAndSaveLogs(lp.ctx, start)
 		case <-backupLogPollTick:
+			if lp.backupPollerBlockDelay == 0 {
+				continue // backup poller is disabled
+			}
 			// Backup log poller:  this serves as an emergency backup to protect against eventual-consistency behavior
 			// of an rpc node (seen occasionally on optimism, but possibly could happen on other chains?).  If the first
 			// time we request a block, no logs or incomplete logs come back, this ensures that every log is eventually
-			// re-requested after it is finalized.  This doesn't add much overhead, because we can request all of them
-			// in one shot, since we don't need to worry about re-orgs after finality depth, and it runs 100x less
-			// frequently than the primary log poller.
+			// re-requested after it is finalized. This doesn't add much overhead, because we can request all of them
+			// in one shot, since we don't need to worry about re-orgs after finality depth, and it runs far less
+			// frequently than the primary log poller (instead of roughly once per block it runs once roughly once every
+			// lp.backupPollerDelay blocks--with default settings about 100x less frequently).
 
-			// If pollPeriod is set to 1 block time, backup log poller will run once every 100 blocks
-			const backupPollerBlockDelay = 100
-
-			backupLogPollTick = time.After(utils.WithJitter(backupPollerBlockDelay * lp.pollPeriod))
+			backupLogPollTick = time.After(utils.WithJitter(time.Duration(lp.backupPollerBlockDelay) * lp.pollPeriod))
 			if !filtersLoaded {
 				lp.lggr.Warnw("Backup log poller ran before filters loaded, skipping")
 				continue
 			}
-			lp.BackupPollAndSaveLogs(lp.ctx, backupPollerBlockDelay)
+			lp.BackupPollAndSaveLogs(lp.ctx)
 		case <-blockPruneTick:
 			blockPruneTick = time.After(utils.WithJitter(lp.pollPeriod * 1000))
 			if err := lp.PruneOldBlocks(lp.ctx); err != nil {
@@ -554,7 +566,7 @@ func (lp *logPoller) run() {
 	}
 }
 
-func (lp *logPoller) BackupPollAndSaveLogs(ctx context.Context, backupPollerBlockDelay int64) {
+func (lp *logPoller) BackupPollAndSaveLogs(ctx context.Context) {
 	if lp.backupPollerNextBlock == 0 {
 		lastProcessed, err := lp.orm.SelectLatestBlock(pg.WithParentCtx(ctx))
 		if err != nil {
@@ -566,7 +578,7 @@ func (lp *logPoller) BackupPollAndSaveLogs(ctx context.Context, backupPollerBloc
 			return
 		}
 		// If this is our first run, start from block min(lastProcessed.FinalizedBlockNumber-1, lastProcessed.BlockNumber-backupPollerBlockDelay)
-		backupStartBlock := mathutil.Min(lastProcessed.FinalizedBlockNumber-1, lastProcessed.BlockNumber-backupPollerBlockDelay)
+		backupStartBlock := mathutil.Min(lastProcessed.FinalizedBlockNumber-1, lastProcessed.BlockNumber-lp.backupPollerBlockDelay)
 		// (or at block 0 if whole blockchain is too short)
 		lp.backupPollerNextBlock = mathutil.Max(backupStartBlock, 0)
 	}

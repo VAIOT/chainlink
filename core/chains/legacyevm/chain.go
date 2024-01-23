@@ -242,16 +242,15 @@ func newChain(ctx context.Context, cfg *evmconfig.ChainScoped, nodes []*toml.Nod
 		if opts.GenLogPoller != nil {
 			logPoller = opts.GenLogPoller(chainID)
 		} else {
-			logPoller = logpoller.NewLogPoller(
-				logpoller.NewObservedORM(chainID, db, l, cfg.Database()),
-				client,
-				l,
-				cfg.EVM().LogPollInterval(),
-				cfg.EVM().FinalityTagEnabled(),
-				int64(cfg.EVM().FinalityDepth()),
-				int64(cfg.EVM().LogBackfillBatchSize()),
-				int64(cfg.EVM().RPCDefaultBatchSize()),
-				int64(cfg.EVM().LogKeepBlocksDepth()))
+			lpOpts := logpoller.Opts{
+				PollPeriod:               cfg.EVM().LogPollInterval(),
+				UseFinalityTag:           cfg.EVM().FinalityTagEnabled(),
+				FinalityDepth:            int64(cfg.EVM().FinalityDepth()),
+				BackfillBatchSize:        int64(cfg.EVM().LogBackfillBatchSize()),
+				RpcBatchSize:             int64(cfg.EVM().RPCDefaultBatchSize()),
+				KeepFinalizedBlocksDepth: int64(cfg.EVM().LogKeepBlocksDepth()),
+			}
+			logPoller = logpoller.NewLogPoller(logpoller.NewObservedORM(chainID, db, l, cfg.Database()), client, l, lpOpts)
 		}
 	}
 
