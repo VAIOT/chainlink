@@ -113,6 +113,7 @@ func (r *ocr2keeperRelayer) NewOCR2KeeperProvider(rargs commontypes.RelayArgs, p
 	if err != nil {
 		return nil, fmt.Errorf("%w: failed to create caller for address and backend", ErrInitializationFailure)
 	}
+
 	// lookback blocks for transmit event is hard coded and should provide ample time for logs
 	// to be detected in most cases
 	var transmitLookbackBlocks int64 = 250
