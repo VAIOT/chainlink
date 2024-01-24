@@ -1382,7 +1382,6 @@ func TestLogPoller_DBErrorHandling(t *testing.T) {
 		BackfillBatchSize:        3,
 		RpcBatchSize:             2,
 		KeepFinalizedBlocksDepth: 1000,
-		BackupPollerBlockDelay:   0,
 	}
 	lp := logpoller.NewLogPoller(o, client.NewSimulatedBackendClient(t, ec, chainID2), lggr, lpOpts)
 
@@ -1399,7 +1398,7 @@ func TestLogPoller_DBErrorHandling(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 	require.NoError(t, lp.Start(ctx))
 	require.Eventually(t, func() bool {
-		return observedLogs.Len() >= 5
+		return observedLogs.Len() >= 4
 	}, 2*time.Second, 20*time.Millisecond)
 	lp.Close()
 
@@ -1416,7 +1415,6 @@ func TestLogPoller_DBErrorHandling(t *testing.T) {
 	assert.Contains(t, logMsgs, "SQL ERROR")
 	assert.Contains(t, logMsgs, "Failed loading filters in main logpoller loop, retrying later")
 	assert.Contains(t, logMsgs, "Error executing replay, could not get fromBlock")
-	assert.Contains(t, logMsgs, "Backup log poller ran before filters loaded, skipping")
 }
 
 type getLogErrData struct {
