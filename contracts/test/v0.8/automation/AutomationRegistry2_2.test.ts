@@ -953,9 +953,13 @@ describe('AutomationRegistry2_2', () => {
       .transfer(await admin.getAddress(), toWei('1000'))
     let tx = await registry
       .connect(owner)
-      [
-        'registerUpkeep(address,uint32,address,bytes,bytes)'
-      ](mock.address, performGas, await admin.getAddress(), randomBytes, '0x')
+      ['registerUpkeep(address,uint32,address,bytes,bytes)'](
+        mock.address,
+        performGas,
+        await admin.getAddress(),
+        randomBytes,
+        '0x',
+      )
     upkeepId = await getUpkeepID(tx)
 
     autoFunderUpkeep = await upkeepAutoFunderFactory
@@ -963,17 +967,27 @@ describe('AutomationRegistry2_2', () => {
       .deploy(linkToken.address, registry.address)
     tx = await registry
       .connect(owner)
-      [
-        'registerUpkeep(address,uint32,address,bytes,bytes)'
-      ](autoFunderUpkeep.address, performGas, autoFunderUpkeep.address, randomBytes, '0x')
+      ['registerUpkeep(address,uint32,address,bytes,bytes)'](
+        autoFunderUpkeep.address,
+        performGas,
+        autoFunderUpkeep.address,
+        randomBytes,
+        '0x',
+      )
     afUpkeepId = await getUpkeepID(tx)
 
     ltUpkeep = await deployMockContract(owner, ILogAutomationactory.abi)
     tx = await registry
       .connect(owner)
-      [
-        'registerUpkeep(address,uint32,address,uint8,bytes,bytes,bytes)'
-      ](ltUpkeep.address, performGas, await admin.getAddress(), Trigger.LOG, '0x', logTriggerConfig, emptyBytes)
+      ['registerUpkeep(address,uint32,address,uint8,bytes,bytes,bytes)'](
+        ltUpkeep.address,
+        performGas,
+        await admin.getAddress(),
+        Trigger.LOG,
+        '0x',
+        logTriggerConfig,
+        emptyBytes,
+      )
     logUpkeepId = await getUpkeepID(tx)
 
     await autoFunderUpkeep.setUpkeepId(afUpkeepId)
@@ -984,9 +998,13 @@ describe('AutomationRegistry2_2', () => {
 
     tx = await registry
       .connect(owner)
-      [
-        'registerUpkeep(address,uint32,address,bytes,bytes)'
-      ](streamsLookupUpkeep.address, performGas, await admin.getAddress(), randomBytes, '0x')
+      ['registerUpkeep(address,uint32,address,bytes,bytes)'](
+        streamsLookupUpkeep.address,
+        performGas,
+        await admin.getAddress(),
+        randomBytes,
+        '0x',
+      )
     streamsLookupUpkeepId = await getUpkeepID(tx)
   }
 
@@ -1004,9 +1022,13 @@ describe('AutomationRegistry2_2', () => {
       await mock.setPerformGasToBurn(BigNumber.from('0'))
       const tx = await registry
         .connect(owner)
-        [
-          'registerUpkeep(address,uint32,address,bytes,bytes)'
-        ](mock.address, performGas, await admin.getAddress(), randomBytes, '0x')
+        ['registerUpkeep(address,uint32,address,bytes,bytes)'](
+          mock.address,
+          performGas,
+          await admin.getAddress(),
+          randomBytes,
+          '0x',
+        )
       const condUpkeepId = await getUpkeepID(tx)
       passingConditionalUpkeepIds.push(condUpkeepId)
 
@@ -1019,9 +1041,15 @@ describe('AutomationRegistry2_2', () => {
       await mock.setPerformGasToBurn(BigNumber.from('0'))
       const tx = await registry
         .connect(owner)
-        [
-          'registerUpkeep(address,uint32,address,uint8,bytes,bytes,bytes)'
-        ](mock.address, performGas, await admin.getAddress(), Trigger.LOG, '0x', logTriggerConfig, emptyBytes)
+        ['registerUpkeep(address,uint32,address,uint8,bytes,bytes,bytes)'](
+          mock.address,
+          performGas,
+          await admin.getAddress(),
+          Trigger.LOG,
+          '0x',
+          logTriggerConfig,
+          emptyBytes,
+        )
       const logUpkeepId = await getUpkeepID(tx)
       passingLogUpkeepIds.push(logUpkeepId)
 
@@ -1034,9 +1062,13 @@ describe('AutomationRegistry2_2', () => {
       await mock.setPerformGasToBurn(BigNumber.from('0'))
       const tx = await registry
         .connect(owner)
-        [
-          'registerUpkeep(address,uint32,address,bytes,bytes)'
-        ](mock.address, performGas, await admin.getAddress(), randomBytes, '0x')
+        ['registerUpkeep(address,uint32,address,bytes,bytes)'](
+          mock.address,
+          performGas,
+          await admin.getAddress(),
+          randomBytes,
+          '0x',
+        )
       const failingUpkeepId = await getUpkeepID(tx)
       failingUpkeepIds.push(failingUpkeepId)
     }
@@ -1518,9 +1550,13 @@ describe('AutomationRegistry2_2', () => {
 
         let tx = await arbRegistry
           .connect(owner)
-          [
-            'registerUpkeep(address,uint32,address,bytes,bytes)'
-          ](mock.address, performGas, await admin.getAddress(), randomBytes, '0x')
+          ['registerUpkeep(address,uint32,address,bytes,bytes)'](
+            mock.address,
+            performGas,
+            await admin.getAddress(),
+            randomBytes,
+            '0x',
+          )
         const testUpkeepId = await getUpkeepID(tx)
         await arbRegistry.connect(owner).addFunds(testUpkeepId, toWei('100'))
 
@@ -2492,9 +2528,13 @@ describe('AutomationRegistry2_2', () => {
           const mock = await upkeepMockFactory.deploy()
           const tx = await registry
             .connect(owner)
-            [
-              'registerUpkeep(address,uint32,address,bytes,bytes)'
-            ](mock.address, performGas, await admin.getAddress(), randomBytes, '0x')
+            ['registerUpkeep(address,uint32,address,bytes,bytes)'](
+              mock.address,
+              performGas,
+              await admin.getAddress(),
+              randomBytes,
+              '0x',
+            )
           const testUpkeepId = await getUpkeepID(tx)
           upkeepIds.push(testUpkeepId)
 
@@ -2529,9 +2569,13 @@ describe('AutomationRegistry2_2', () => {
           const mock = await upkeepMockFactory.deploy()
           const tx = await arbRegistry
             .connect(owner)
-            [
-              'registerUpkeep(address,uint32,address,bytes,bytes)'
-            ](mock.address, performGas, await admin.getAddress(), randomBytes, '0x')
+            ['registerUpkeep(address,uint32,address,bytes,bytes)'](
+              mock.address,
+              performGas,
+              await admin.getAddress(),
+              randomBytes,
+              '0x',
+            )
           const testUpkeepId = await getUpkeepID(tx)
           upkeepIds.push(testUpkeepId)
 
@@ -2588,9 +2632,13 @@ describe('AutomationRegistry2_2', () => {
       // add funds to upkeep 1 and perform and withdraw some payment
       const tx = await registry
         .connect(owner)
-        [
-          'registerUpkeep(address,uint32,address,bytes,bytes)'
-        ](mock.address, performGas, await admin.getAddress(), emptyBytes, emptyBytes)
+        ['registerUpkeep(address,uint32,address,bytes,bytes)'](
+          mock.address,
+          performGas,
+          await admin.getAddress(),
+          emptyBytes,
+          emptyBytes,
+        )
 
       const id1 = await getUpkeepID(tx)
       await registry.connect(admin).addFunds(id1, toWei('5'))
@@ -2612,9 +2660,13 @@ describe('AutomationRegistry2_2', () => {
       // add funds to upkeep 2 and perform and withdraw some payment
       const tx2 = await registry
         .connect(owner)
-        [
-          'registerUpkeep(address,uint32,address,bytes,bytes)'
-        ](mock.address, performGas, await admin.getAddress(), emptyBytes, emptyBytes)
+        ['registerUpkeep(address,uint32,address,bytes,bytes)'](
+          mock.address,
+          performGas,
+          await admin.getAddress(),
+          emptyBytes,
+          emptyBytes,
+        )
       const id2 = await getUpkeepID(tx2)
       await registry.connect(admin).addFunds(id2, toWei('5'))
 
@@ -2692,15 +2744,23 @@ describe('AutomationRegistry2_2', () => {
     it('uses maxPerformData size in checkUpkeep but actual performDataSize in transmit', async () => {
       const tx1 = await registry
         .connect(owner)
-        [
-          'registerUpkeep(address,uint32,address,bytes,bytes)'
-        ](mock.address, performGas, await admin.getAddress(), randomBytes, '0x')
+        ['registerUpkeep(address,uint32,address,bytes,bytes)'](
+          mock.address,
+          performGas,
+          await admin.getAddress(),
+          randomBytes,
+          '0x',
+        )
       const upkeepID1 = await getUpkeepID(tx1)
       const tx2 = await registry
         .connect(owner)
-        [
-          'registerUpkeep(address,uint32,address,bytes,bytes)'
-        ](mock.address, performGas, await admin.getAddress(), randomBytes, '0x')
+        ['registerUpkeep(address,uint32,address,bytes,bytes)'](
+          mock.address,
+          performGas,
+          await admin.getAddress(),
+          randomBytes,
+          '0x',
+        )
       const upkeepID2 = await getUpkeepID(tx2)
       await mock.setCanCheck(true)
       await mock.setCanPerform(true)
@@ -2763,9 +2823,13 @@ describe('AutomationRegistry2_2', () => {
     beforeEach(async () => {
       const tx = await registry
         .connect(owner)
-        [
-          'registerUpkeep(address,uint32,address,bytes,bytes)'
-        ](mock.address, performGas, await admin.getAddress(), randomBytes, '0x')
+        ['registerUpkeep(address,uint32,address,bytes,bytes)'](
+          mock.address,
+          performGas,
+          await admin.getAddress(),
+          randomBytes,
+          '0x',
+        )
       upkeepId2 = await getUpkeepID(tx)
 
       await registry.connect(admin).addFunds(upkeepId, toWei('100'))
@@ -3906,9 +3970,13 @@ describe('AutomationRegistry2_2', () => {
       await evmRevert(
         registry
           .connect(owner)
-          [
-            'registerUpkeep(address,uint32,address,bytes,bytes)'
-          ](mock.address, performGas, await admin.getAddress(), emptyBytes, '0x'),
+          ['registerUpkeep(address,uint32,address,bytes,bytes)'](
+            mock.address,
+            performGas,
+            await admin.getAddress(),
+            emptyBytes,
+            '0x',
+          ),
         'RegistryPaused()',
       )
     })
@@ -3917,9 +3985,13 @@ describe('AutomationRegistry2_2', () => {
       await evmRevert(
         registry
           .connect(owner)
-          [
-            'registerUpkeep(address,uint32,address,bytes,bytes)'
-          ](zeroAddress, performGas, await admin.getAddress(), emptyBytes, '0x'),
+          ['registerUpkeep(address,uint32,address,bytes,bytes)'](
+            zeroAddress,
+            performGas,
+            await admin.getAddress(),
+            emptyBytes,
+            '0x',
+          ),
         'NotAContract()',
       )
     })
@@ -3928,9 +4000,13 @@ describe('AutomationRegistry2_2', () => {
       await evmRevert(
         registry
           .connect(keeper1)
-          [
-            'registerUpkeep(address,uint32,address,bytes,bytes)'
-          ](mock.address, performGas, await admin.getAddress(), emptyBytes, '0x'),
+          ['registerUpkeep(address,uint32,address,bytes,bytes)'](
+            mock.address,
+            performGas,
+            await admin.getAddress(),
+            emptyBytes,
+            '0x',
+          ),
         'OnlyCallableByOwnerOrRegistrar()',
       )
     })
@@ -3939,9 +4015,13 @@ describe('AutomationRegistry2_2', () => {
       await evmRevert(
         registry
           .connect(owner)
-          [
-            'registerUpkeep(address,uint32,address,bytes,bytes)'
-          ](mock.address, 2299, await admin.getAddress(), emptyBytes, '0x'),
+          ['registerUpkeep(address,uint32,address,bytes,bytes)'](
+            mock.address,
+            2299,
+            await admin.getAddress(),
+            emptyBytes,
+            '0x',
+          ),
         'GasLimitOutsideRange()',
       )
     })
@@ -3950,9 +4030,13 @@ describe('AutomationRegistry2_2', () => {
       await evmRevert(
         registry
           .connect(owner)
-          [
-            'registerUpkeep(address,uint32,address,bytes,bytes)'
-          ](mock.address, 5000001, await admin.getAddress(), emptyBytes, '0x'),
+          ['registerUpkeep(address,uint32,address,bytes,bytes)'](
+            mock.address,
+            5000001,
+            await admin.getAddress(),
+            emptyBytes,
+            '0x',
+          ),
         'GasLimitOutsideRange()',
       )
     })
@@ -3965,9 +4049,13 @@ describe('AutomationRegistry2_2', () => {
       await evmRevert(
         registry
           .connect(owner)
-          [
-            'registerUpkeep(address,uint32,address,bytes,bytes)'
-          ](mock.address, performGas, await admin.getAddress(), longBytes, '0x'),
+          ['registerUpkeep(address,uint32,address,bytes,bytes)'](
+            mock.address,
+            performGas,
+            await admin.getAddress(),
+            longBytes,
+            '0x',
+          ),
         'CheckDataExceedsLimit()',
       )
     })
@@ -3982,9 +4070,13 @@ describe('AutomationRegistry2_2', () => {
           const checkData = checkDatas[kdx]
           const tx = await registry
             .connect(owner)
-            [
-              'registerUpkeep(address,uint32,address,bytes,bytes)'
-            ](mock.address, performGas, await admin.getAddress(), checkData, '0x')
+            ['registerUpkeep(address,uint32,address,bytes,bytes)'](
+              mock.address,
+              performGas,
+              await admin.getAddress(),
+              checkData,
+              '0x',
+            )
 
           //confirm the upkeep details and verify emitted events
           const testUpkeepId = await getUpkeepID(tx)
@@ -4646,9 +4738,13 @@ describe('AutomationRegistry2_2', () => {
       await evmRevert(
         registry
           .connect(owner)
-          [
-            'registerUpkeep(address,uint32,address,bytes,bytes)'
-          ](mock.address, performGas, await admin.getAddress(), emptyBytes, '0x'),
+          ['registerUpkeep(address,uint32,address,bytes,bytes)'](
+            mock.address,
+            performGas,
+            await admin.getAddress(),
+            emptyBytes,
+            '0x',
+          ),
         'RegistryPaused()',
       )
     })
