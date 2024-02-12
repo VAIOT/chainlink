@@ -9,8 +9,9 @@ contract FunctionsCoordinatorTestHelper is FunctionsCoordinator {
   constructor(
     address router,
     FunctionsBillingConfig memory config,
-    address linkToNativeFeed
-  ) FunctionsCoordinator(router, config, linkToNativeFeed) {}
+    address linkToNativeFeed,
+    address linkToUsdFeed
+  ) FunctionsCoordinator(router, config, linkToNativeFeed, linkToUsdFeed) {}
 
   function callReport(bytes calldata report) external {
     address[MAX_NUM_ORACLES] memory signers;
