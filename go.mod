@@ -34,7 +34,7 @@ require (
 	github.com/graph-gophers/graphql-go v1.3.0
 	github.com/hashicorp/consul/sdk v0.14.1
 	github.com/hashicorp/go-envparse v0.1.0
-	github.com/hashicorp/go-plugin v1.5.2
+	github.com/hashicorp/go-plugin v1.6.0
 	github.com/hdevalence/ed25519consensus v0.1.0
 	github.com/jackc/pgconn v1.14.1
 	github.com/jackc/pgtype v1.14.0
@@ -68,7 +68,7 @@ require (
 	github.com/smartcontractkit/chainlink-automation v1.0.2-0.20240118014648-1ab6a88c9429
 	github.com/smartcontractkit/chainlink-common v0.1.7-0.20240209032254-f9b58810d8ca
 	github.com/smartcontractkit/chainlink-cosmos v0.4.1-0.20240206150430-fbccaa95af62
-	github.com/smartcontractkit/chainlink-data-streams v0.0.0-20231204152908-a6e3fe8ff2a1
+	github.com/smartcontractkit/chainlink-data-streams v0.0.0-20240212130740-ca2db9ce7c53
 	github.com/smartcontractkit/chainlink-feeds v0.0.0-20240119021347-3c541a78cdb8
 	github.com/smartcontractkit/chainlink-solana v1.0.3-0.20240207182351-414a66663857
 	github.com/smartcontractkit/chainlink-starknet/relayer v0.0.1-beta-test.0.20240206145519-35a4346b5944
@@ -219,7 +219,7 @@ require (
 	github.com/hashicorp/go-immutable-radix v1.3.1 // indirect
 	github.com/hashicorp/golang-lru v0.6.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
-	github.com/hashicorp/yamux v0.0.0-20200609203250-aecfd211c9ce // indirect
+	github.com/hashicorp/yamux v0.1.1 // indirect
 	github.com/holiman/billy v0.0.0-20230718173358-1c7e68d277a7 // indirect
 	github.com/holiman/bloomfilter/v2 v2.0.3 // indirect
 	github.com/holiman/uint256 v1.2.4 // indirect
