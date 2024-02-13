@@ -99,7 +99,7 @@ func (c *Core) ValidateConfig() (err error) {
 	}
 
 	if (*c.OCR.Enabled || *c.OCR2.Enabled) && !*c.P2P.V2.Enabled {
-		err = multierr.Append(err, configutils.ErrInvalid{Name: "OCRP2P", Value: true, Msg: fmt.Sprint("P2P required for OCR or OCR2. Please configure P2P or disable OCR/OCR2.")})
+		err = multierr.Append(err, configutils.ErrInvalid{Name: "P2P.V2.Enabled", Value: false, Msg: "P2P required for OCR or OCR2. Please enable P2P or disable OCR/OCR2."})
 	}
 
 	return err
