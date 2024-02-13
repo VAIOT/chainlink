@@ -340,11 +340,10 @@ func (b *BlockHistoryEstimator) checkConnectivity(attempts []EvmPriorAttempt) er
 		// reverse order since we want to go highest -> lowest block number and bail out early
 		for i := l - 1; i >= 0; i-- {
 			block := blockHistory[i]
-			if block.Number >= broadcastBeforeBlockNum {
-				blocks = append(blocks, block)
-			} else {
+			if block.Number < broadcastBeforeBlockNum {
 				break
 			}
+			blocks = append(blocks, block)
 		}
 		var eip1559 bool
 		switch attempt.TxType {
@@ -774,20 +773,18 @@ func (b *BlockHistoryEstimator) getPricesFromBlocks(blocks []evmtypes.Block, eip
 		for _, tx := range block.Transactions {
 			if b.IsUsable(tx, block, b.config.ChainType(), b.eConfig.PriceMin(), b.logger) {
 				gp := b.EffectiveGasPrice(block, tx)
-				if gp != nil {
-					gasPrices = append(gasPrices, gp)
-				} else {
+				if gp == nil {
 					b.logger.Warnw("Unable to get gas price for tx", "tx", tx, "block", block)
 					continue
 				}
+				gasPrices = append(gasPrices, gp)
 				if eip1559 {
 					tc := b.EffectiveTipCap(block, tx)
-					if tc != nil {
-						tipCaps = append(tipCaps, tc)
-					} else {
+					if tc == nil {
 						b.logger.Warnw("Unable to get tip cap for tx", "tx", tx, "block", block)
 						continue
 					}
+					tipCaps = append(tipCaps, tc)
 				}
 			}
 		}
