@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/pelletier/go-toml/v2"
@@ -10,14 +11,7 @@ import (
 
 func Test_Config(t *testing.T) {
 	t.Run("unmarshals from toml", func(t *testing.T) {
-		t.Run("with all possible values set", func(t *testing.T) {
-			rawToml := `
-				ServerURL = "example.com:80"
-				ServerPubKey = "724ff6eae9e900270edfff233e16322a70ec06e1a6e62a81ef13921f398f6c93"
-				ChannelDefinitionsContractAddress = "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
-				ChannelDefinitionsContractFromBlock = 1234
-				ChannelDefinitions = """
-{
+		cdjson := `{
 	"42": {
 		"reportFormat": "example-llo-report-format",
 		"chainSelector": 142,
@@ -27,15 +21,23 @@ func Test_Config(t *testing.T) {
 		"reportFormat": "example-llo-report-format",
 		"chainSelector": 142,
 		"streamIds": [1, 3]
-	}
+	},
 	"44": {
 		"reportFormat": "example-llo-report-format",
 		"chainSelector": 143,
 		"streamIds": [1, 4]
 	}
-}
-"""
-			`
+}`
+
+		t.Run("with all possible values set", func(t *testing.T) {
+			rawToml := fmt.Sprintf(`
+				ServerURL = "example.com:80"
+				ServerPubKey = "724ff6eae9e900270edfff233e16322a70ec06e1a6e62a81ef13921f398f6c93"
+				ChannelDefinitionsContractAddress = "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
+				ChannelDefinitionsContractFromBlock = 1234
+				ChannelDefinitions = """
+%s
+"""`, cdjson)
 
 			var mc PluginConfig
 			err := toml.Unmarshal([]byte(rawToml), &mc)
@@ -43,23 +45,79 @@ func Test_Config(t *testing.T) {
 
 			assert.Equal(t, "example.com:80", mc.RawServerURL)
 			assert.Equal(t, "724ff6eae9e900270edfff233e16322a70ec06e1a6e62a81ef13921f398f6c93", mc.ServerPubKey.String())
-			assert.Equal(t, "foo", mc.ChannelDefinitionsContractAddress)
+			assert.Equal(t, "0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF", mc.ChannelDefinitionsContractAddress.Hex())
 			assert.Equal(t, int64(1234), mc.ChannelDefinitionsContractFromBlock)
-			assert.Equal(t, "foo", mc.ChannelDefinitions)
+			assert.JSONEq(t, cdjson, mc.ChannelDefinitions)
+
+			err = mc.Validate()
+			require.Error(t, err)
+
+			assert.Contains(t, err.Error(), "llo: ChannelDefinitionsContractAddress is not allowed if ChannelDefinitions is specified")
+			assert.Contains(t, err.Error(), "llo: ChannelDefinitionsContractFromBlock is not allowed if ChannelDefinitions is specified")
+		})
+
+		t.Run("with only channelDefinitions", func(t *testing.T) {
+			rawToml := fmt.Sprintf(`
+				ServerURL = "example.com:80"
+				ServerPubKey = "724ff6eae9e900270edfff233e16322a70ec06e1a6e62a81ef13921f398f6c93"
+				ChannelDefinitions = """
+%s
+"""`, cdjson)
+
+			var mc PluginConfig
+			err := toml.Unmarshal([]byte(rawToml), &mc)
+			require.NoError(t, err)
+
+			assert.Equal(t, "example.com:80", mc.RawServerURL)
+			assert.Equal(t, "724ff6eae9e900270edfff233e16322a70ec06e1a6e62a81ef13921f398f6c93", mc.ServerPubKey.String())
+			assert.JSONEq(t, cdjson, mc.ChannelDefinitions)
 
 			err = mc.Validate()
 			require.NoError(t, err)
 		})
+		t.Run("with only channelDefinitions contract details", func(t *testing.T) {
+			rawToml := `
+			ServerURL = "example.com:80"
+			ServerPubKey = "724ff6eae9e900270edfff233e16322a70ec06e1a6e62a81ef13921f398f6c93"
+			ChannelDefinitionsContractAddress = "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"`
+
+			var mc PluginConfig
+			err := toml.Unmarshal([]byte(rawToml), &mc)
+			require.NoError(t, err)
+
+			assert.Equal(t, "example.com:80", mc.RawServerURL)
+			assert.Equal(t, "724ff6eae9e900270edfff233e16322a70ec06e1a6e62a81ef13921f398f6c93", mc.ServerPubKey.String())
+			assert.Equal(t, "0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF", mc.ChannelDefinitionsContractAddress.Hex())
+
+			err = mc.Validate()
+			require.NoError(t, err)
+		})
+		t.Run("with missing ChannelDefinitionsContractAddress", func(t *testing.T) {
+			rawToml := `
+			ServerURL = "example.com:80"
+			ServerPubKey = "724ff6eae9e900270edfff233e16322a70ec06e1a6e62a81ef13921f398f6c93"`
+
+			var mc PluginConfig
+			err := toml.Unmarshal([]byte(rawToml), &mc)
+			require.NoError(t, err)
+
+			assert.Equal(t, "example.com:80", mc.RawServerURL)
+			assert.Equal(t, "724ff6eae9e900270edfff233e16322a70ec06e1a6e62a81ef13921f398f6c93", mc.ServerPubKey.String())
+
+			err = mc.Validate()
+			require.Error(t, err)
+			assert.EqualError(t, err, "llo: ChannelDefinitionsContractAddress is required if ChannelDefinitions is not specified")
+		})
 
 		t.Run("with invalid values", func(t *testing.T) {
 			rawToml := `
-				InitialBlockNumber = "invalid"
+				ChannelDefinitionsContractFromBlock = "invalid"
 			`
 
 			var mc PluginConfig
 			err := toml.Unmarshal([]byte(rawToml), &mc)
 			require.Error(t, err)
-			assert.EqualError(t, err, `toml: strconv.ParseInt: parsing "invalid": invalid syntax`)
+			assert.EqualError(t, err, `toml: cannot decode TOML string into struct field config.PluginConfig.ChannelDefinitionsContractFromBlock of type int64`)
 
 			rawToml = `
 				ServerURL = "http://example.com"
@@ -71,8 +129,8 @@ func Test_Config(t *testing.T) {
 
 			err = mc.Validate()
 			require.Error(t, err)
-			assert.Contains(t, err.Error(), `Mercury: invalid scheme specified for MercuryServer, got: "http://example.com" (scheme: "http") but expected a websocket url e.g. "192.0.2.2:4242" or "wss://192.0.2.2:4242"`)
-			assert.Contains(t, err.Error(), `mercury: ServerPubKey is required and must be a 32-byte hex string`)
+			assert.Contains(t, err.Error(), `invalid scheme specified for MercuryServer, got: "http://example.com" (scheme: "http") but expected a websocket url e.g. "192.0.2.2:4242" or "wss://192.0.2.2:4242"`)
+			assert.Contains(t, err.Error(), `ServerPubKey is required and must be a 32-byte hex string`)
 		})
 	})
 }

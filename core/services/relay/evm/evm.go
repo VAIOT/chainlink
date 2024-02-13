@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 	"sync"
 
@@ -253,17 +254,21 @@ func (r *Relayer) NewLLOProvider(rargs commontypes.RelayArgs, pargs commontypes.
 
 	// FIXME: Remove after benchmarking is done
 	// 	https://smartcontract-it.atlassian.net/browse/MERC-3487
-	if os.GetEnv("LLO_BENCHMARK_MODE") == "true" {
-		transmitter := bm.NewTransmitter(r.lggr, privKey.PublicKey)
+	var transmitter llo.Transmitter
+	if os.Getenv("LLO_BENCHMARK_MODE") == "true" {
+		transmitter = bm.NewTransmitter(r.lggr, privKey.PublicKey)
 	} else {
 		client, err := r.mercuryPool.Checkout(context.Background(), privKey, lloConfig.ServerPubKey, lloConfig.ServerURL())
 		if err != nil {
 			return nil, err
 		}
-		transmitter := llo.NewTransmitter(r.lggr, client, privKey.PublicKey)
+		transmitter = llo.NewTransmitter(r.lggr, client, privKey.PublicKey)
 	}
 
-	cdc := r.cdcFactory.NewCache(lloConfig.ChannelDefinitionsContractAddress, lloConfig.ChannelDefinitionsContractFromBlock)
+	cdc, err := r.cdcFactory.NewCache(lloConfig)
+	if err != nil {
+		return nil, err
+	}
 	return NewLLOProvider(cp, transmitter, r.lggr, cdc), nil
 }
 

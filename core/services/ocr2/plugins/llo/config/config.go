@@ -4,6 +4,7 @@
 package config
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/url"
@@ -25,10 +26,10 @@ type PluginConfig struct {
 	ChannelDefinitionsContractFromBlock int64          `json:"channelDefinitionsContractFromBlock" toml:"channelDefinitionsContractFromBlock"`
 
 	// NOTE: ChannelDefinitions is an override.
-	// If ChannelDefinitions is specified, values for
+	// If Channe}lDefinitions is specified, values for
 	// ChannelDefinitionsContractAddress and
 	// ChannelDefinitionsContractFromBlock will be ignored
-	ChannelDefinitions commontypes.ChannelDefinitions `json:"channelDefinitions" toml:"channelDefinitions"`
+	ChannelDefinitions string `json:"channelDefinitions" toml:"channelDefinitions"`
 }
 
 func (p PluginConfig) Validate() (merr error) {
@@ -49,19 +50,20 @@ func (p PluginConfig) Validate() (merr error) {
 		}
 	}
 
-	if p.ChannelDefinitions != nil {
+	if p.ChannelDefinitions != "" {
 		if p.ChannelDefinitionsContractAddress != (common.Address{}) {
 			merr = errors.Join(merr, errors.New("llo: ChannelDefinitionsContractAddress is not allowed if ChannelDefinitions is specified"))
 		}
 		if p.ChannelDefinitionsContractFromBlock != 0 {
 			merr = errors.Join(merr, errors.New("llo: ChannelDefinitionsContractFromBlock is not allowed if ChannelDefinitions is specified"))
 		}
+		var cd commontypes.ChannelDefinitions
+		if err := json.Unmarshal([]byte(p.ChannelDefinitions), &cd); err != nil {
+			merr = errors.Join(merr, fmt.Errorf("channelDefinitions is invalid JSON: %w", err))
+		}
 	} else {
 		if p.ChannelDefinitionsContractAddress == (common.Address{}) {
 			merr = errors.Join(merr, errors.New("llo: ChannelDefinitionsContractAddress is required if ChannelDefinitions is not specified"))
-		}
-		if p.ChannelDefinitionsContractFromBlock == 0 {
-			merr = errors.Join(merr, errors.New("llo: ChannelDefinitionsContractFromBlock is required if ChannelDefinitions is not specified"))
 		}
 	}
 

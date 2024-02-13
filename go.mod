@@ -69,7 +69,7 @@ require (
 	github.com/smartcontractkit/chainlink-automation v1.0.2-0.20240118014648-1ab6a88c9429
 	github.com/smartcontractkit/chainlink-common v0.1.7-0.20240212160026-5d1fecc0a699
 	github.com/smartcontractkit/chainlink-cosmos v0.4.1-0.20240206150430-fbccaa95af62
-	github.com/smartcontractkit/chainlink-data-streams v0.0.0-20231204152908-a6e3fe8ff2a1
+	github.com/smartcontractkit/chainlink-data-streams v0.0.0-20240209152855-2032ee6b71be
 	github.com/smartcontractkit/chainlink-feeds v0.0.0-20240119021347-3c541a78cdb8
 	github.com/smartcontractkit/chainlink-solana v1.0.3-0.20240207182351-414a66663857
 	github.com/smartcontractkit/chainlink-starknet/relayer v0.0.1-beta-test.0.20240206145519-35a4346b5944
@@ -341,12 +341,6 @@ replace (
 	// until merged upstream: https://github.com/mwitkow/grpc-proxy/pull/69
 	github.com/mwitkow/grpc-proxy => github.com/smartcontractkit/grpc-proxy v0.0.0-20230731113816-f1be6620749f
 
-	// TODO: streams
-	github.com/smartcontractkit/chainlink-common => /Users/sam/code/smartcontractkit/chainlink-common
-	github.com/smartcontractkit/chainlink-cosmos => /Users/sam/code/smartcontractkit/chainlink-cosmos
-	github.com/smartcontractkit/chainlink-data-streams => /Users/sam/code/smartcontractkit/chainlink-data-streams
-	github.com/smartcontractkit/chainlink-solana => /Users/sam/code/smartcontractkit/chainlink-solana
-	github.com/smartcontractkit/chainlink-starknet/relayer => /Users/sam/code/smartcontractkit/chainlink-starknet/relayer
 	github.com/smartcontractkit/libocr => /Users/sam/code/smartcontractkit/libocr
 
 )

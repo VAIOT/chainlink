@@ -9,10 +9,11 @@ import (
 
 	"github.com/smartcontractkit/chainlink/v2/core/chains/evm/logpoller"
 	"github.com/smartcontractkit/chainlink/v2/core/logger"
+	lloconfig "github.com/smartcontractkit/chainlink/v2/core/services/ocr2/plugins/llo/config"
 )
 
 type ChannelDefinitionCacheFactory interface {
-	NewCache(addr common.Address, fromBlock int64) commontypes.ChannelDefinitionCache
+	NewCache(cfg lloconfig.PluginConfig) (commontypes.ChannelDefinitionCache, error)
 }
 
 var _ ChannelDefinitionCacheFactory = &channelDefinitionCacheFactory{}
@@ -36,7 +37,14 @@ type channelDefinitionCacheFactory struct {
 	mu     sync.Mutex
 }
 
-func (f *channelDefinitionCacheFactory) NewCache(addr common.Address, fromBlock int64) commontypes.ChannelDefinitionCache {
+func (f *channelDefinitionCacheFactory) NewCache(cfg lloconfig.PluginConfig) (commontypes.ChannelDefinitionCache, error) {
+	if cfg.ChannelDefinitions != "" {
+		return NewStaticChannelDefinitionCache(f.lggr, cfg.ChannelDefinitions)
+	}
+
+	addr := cfg.ChannelDefinitionsContractAddress
+	fromBlock := cfg.ChannelDefinitionsContractFromBlock
+
 	f.mu.Lock()
 	defer f.mu.Unlock()
 
@@ -45,5 +53,5 @@ func (f *channelDefinitionCacheFactory) NewCache(addr common.Address, fromBlock 
 		panic("cannot create duplicate cache")
 	}
 	f.caches[addr] = struct{}{}
-	return NewChannelDefinitionCache(f.lggr, f.orm, f.lp, addr, fromBlock)
+	return NewChannelDefinitionCache(f.lggr, f.orm, f.lp, addr, fromBlock), nil
 }

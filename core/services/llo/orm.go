@@ -51,10 +51,11 @@ func (o *orm) LoadChannelDefinitions(ctx context.Context, addr common.Address) (
 }
 
 func (o *orm) StoreChannelDefinitions(ctx context.Context, cd commontypes.ChannelDefinitions, blockNum int64) error {
-	return o.q.ExecContext(ctx, `
+	_, err := o.q.ExecContext(ctx, `
 INSERT INTO channel_definitions (evm_chain_id, addr, definitions, block_num)
 VALUES ($1, $2, $3, $4)
 ON CONFLICT (evm_chain_id, addr) DO UPDATE
 SET definitions = $3, block_num = $4
 `)
+	return fmt.Errorf("StoreChannelDefinitions failed: %w", err)
 }
