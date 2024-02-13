@@ -181,6 +181,24 @@ contract AutomationRegistryLogicA2_2 is AutomationRegistryBase2_2, Chainable {
   }
 
   /**
+   * @dev checkCallback is used specifically for automation data streams lookups (see StreamsLookupCompatibleInterface.sol)
+   * @param id the upkeepID to execute a callback for
+   * @param values the values returned from the data streams lookup
+   * @param extraData the user-provided extra context data
+   */
+  function checkErrorHandler(
+    uint256 id,
+    bytes[] memory values,
+    bytes calldata extraData
+  )
+  external
+  returns (bool upkeepNeeded, bytes memory performData, UpkeepFailureReason upkeepFailureReason, uint256 gasUsed)
+  {
+    bytes memory payload = abi.encodeWithSelector(CHECK_ERRORHANDLER_SELECTOR, values, extraData);
+    return executeCallback(id, payload);
+  }
+
+  /**
    * @notice this is a generic callback executor that forwards a call to a user's contract with the configured
    * gas limit
    * @param id the upkeepID to execute a callback for
